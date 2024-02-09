@@ -44,7 +44,7 @@ monogatari.assets ('gallery', {
 
 // Define the music used in the game.
 monogatari.assets ('music', {
-
+	'dungeon_synth' : 'beyond the edge of the world - lookfar (dungeon synth EP).mp3'
 });
 
 // Define the voice files used in the game.
@@ -92,24 +92,45 @@ monogatari.script ({
 	// The game starts here.
 	'Start': [
 		'show scene eagle',
+		'play music dungeon_synth',
 		'This is a statement',
-		'This is another statement',
-		'wowie i can add so many statements',
+		{
+			'Choice': {
+				'Dialog': 'You notice a pizza slice on the ground.',
+				'Get the slice': {
+					'Text': 'Get the slice',
+					'Do': 'You quickly pick up the pizza slice. Can\'t be leaving that out on the streets.',
+					//update pizza value by 1
+					"onChosen": function() { modifyPizzaSliceCount(1) },
+				},
+				'Leave the slice': {
+					'Text': 'Leave the slice',
+					'Do': 'You leave the pizza slice. Awfully suspicious for that to be lying around.'
+				}
+			}
+		},
 		'creature now there\'s a person saying this sentence omg',
 
 		'show character creature normal',
 		'creature omg i just appeared in front of your eyes',
+		
+		//check if pizza is present - conditional
+		{'Conditional': {
+			'Condition': function () {
+				return getPizzaSliceCount() > 0;
+			},
+			'True': 'jump PizzaEnding',
+			'False': 'jump label-1'
+		}}
+	],
 
+	'label-1': [
 		'show character creature angry',
 		'creature im so angry right now',
 		
 		'show character creature demonmode',
 		'creature now youve really done it',
 		
-		'jump label-1'
-	],
-
-	'label-1': [
 		'show scene gonb',
 		'show character creature demonmode',
 		'The creature shifts intimidatingly in your direction. You feel your palms begin to sweat.',
@@ -145,8 +166,28 @@ monogatari.script ({
 		'show character creature normal',
 		'oh...',
 		'it\'s just hungry...',
-		'you feed it a pizza. the creature becomes your best friend forever',
+
+		'end'
+	],
+
+	'PizzaEnding': [
+		'show scene gonb',
+		'show character creature normal',
+		'The creature perks up. It smells the pizza on you.',
+		'You feed it a pizza. The creature becomes your best friend forever',
 
 		'end'
 	]
 });
+
+////////////////
+// FUNCTIONS //
+//////////////
+
+function modifyPizzaSliceCount(i) {
+    monogatari.storage().player.pizza += i;
+};
+
+function getPizzaSliceCount() {
+    return monogatari.storage().player.pizza;
+};
